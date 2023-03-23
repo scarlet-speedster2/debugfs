@@ -1,5 +1,5 @@
 import subprocess
-from PyQt6.QtWidgets import QApplication, QMainWindow, QAction, QTextEdit
+from PyQt6.QtWidgets import QApplication, QMainWindow, QMenuBar, QMenu, QTextEdit
 
 
 class MainWindow(QMainWindow):
@@ -13,11 +13,16 @@ class MainWindow(QMainWindow):
         self.setCentralWidget(self.textEdit)
 
         # Create a menu bar
-        menuBar = self.menuBar()
-        fileMenu = menuBar.addMenu('&File')
-        statsAction = QAction('Run Stats', self)
-        statsAction.triggered.connect(self.runStats)
-        fileMenu.addAction(statsAction)
+        menuBar = QMenuBar(self)
+        self.setMenuBar(menuBar)
+
+        # Create a "File" menu
+        fileMenu = QMenu('File', self)
+        menuBar.addMenu(fileMenu)
+
+        # Create a "Run Stats" action in the "File" menu
+        runStatsAction = fileMenu.addAction('Stats')
+        runStatsAction.triggered.connect(self.runStats)
 
         # Set the window title and show the window
         self.setWindowTitle('MainWindow')
