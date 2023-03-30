@@ -1,11 +1,13 @@
 import subprocess
 from PyQt6.QtWidgets import QApplication, QMainWindow, QMenuBar, QMenu, QTextEdit
-
+from passwd import PasswordDialog
+from stats import display_ext2_info
 
 class MainWindow(QMainWindow):
     def __init__(self):
         super().__init__()
         self.initUI()
+        super().setWindowTitle("Debugfs")
 
     def initUI(self):
         # Create a text editor widget
@@ -30,14 +32,12 @@ class MainWindow(QMainWindow):
 
     def runStats(self):
         # Run debugfs with the stats command and capture the output
-        with subprocess.Popen(['sudo', 'debugfs', '/dev/sda3'], stdin=subprocess.PIPE, stdout=subprocess.PIPE) as proc:
-            stats_output, _ = proc.communicate(b'stats\n')
+        
+        stats_output = display_ext2_info()
+        
 
         # Update the text editor with the output
-        self.textEdit.setText(stats_output.decode())
+        self.textEdit.setText(stats_output)
 
 
-if __name__ == '__main__':
-    app = QApplication([])
-    window = MainWindow()
-    app.exec()
+
