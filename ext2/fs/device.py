@@ -39,6 +39,7 @@ class _DeviceFromFile(object):
 
   def read(self, position, size):
     """Reads a byte string of the specified size from the specified position."""
+    #print(position,type(position))
     assert self.isMounted, "Device not mounted."
     assert position+size <= self._imageSize, "Requested bytes out of range."
     self._imageFile.seek(position)

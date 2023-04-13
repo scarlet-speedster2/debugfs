@@ -47,7 +47,7 @@ class _Inode(object):
   @property
   def numDataBlocks(self):
     """Gets the number of blocks used for only data inside the inode."""
-    return int(ceil(float(self._size) / self._superblock.blockSize))
+    return int(ceil(float(self._size) // self._superblock.blockSize))
 
   @property
   def mode(self):
@@ -148,7 +148,7 @@ class _Inode(object):
     
     bgroupNum = 0
     bgdtEntry = None
-    bitmapSize = superblock.numInodesPerGroup / 8
+    bitmapSize = superblock.numInodesPerGroup // 8
 
     for bgroupNum, bgdtEntry in enumerate(bgdt.entries):
       if bgdtEntry.numFreeInodes > 0:
@@ -195,7 +195,7 @@ class _Inode(object):
     
     # write new inode bytes to the device
     bgroupIndex = (inodeNum - 1) % superblock.numInodesPerGroup
-    tableBid = bgdtEntry.inodeTableLocation + (bgroupIndex * superblock.inodeSize) / fs.blockSize
+    tableBid = bgdtEntry.inodeTableLocation + (bgroupIndex * superblock.inodeSize) // fs.blockSize
     inodeTableOffset = (bgroupIndex * superblock.inodeSize) % fs.blockSize
     fs._writeToBlock(tableBid, inodeTableOffset, inodeBytes)
 
@@ -207,12 +207,13 @@ class _Inode(object):
   def read(cls, inodeNum, bgdt, superblock, fs):
     """Reads the inode with the specified inode number and returns the new object."""
 
-    bgroupNum = (inodeNum - 1) / superblock.numInodesPerGroup
+    #bgroupNum = (inodeNum - 1) / superblock.numInodesPerGroup
+    bgroupNum = (inodeNum - 1) // superblock.numInodesPerGroup
     bgroupIndex = (inodeNum - 1) % superblock.numInodesPerGroup
     bgdtEntry = bgdt.entries[bgroupNum]
 
-    bitmapByteIndex = bgroupIndex / 8
-    tableBid = bgdtEntry.inodeTableLocation + (bgroupIndex * superblock.inodeSize) / fs.blockSize
+    bitmapByteIndex = bgroupIndex // 8
+    tableBid = bgdtEntry.inodeTableLocation + (bgroupIndex * superblock.inodeSize) // fs.blockSize
     inodeTableOffset = (bgroupIndex * superblock.inodeSize) % fs.blockSize
     
     bitmapByte = unpack("B", fs._readBlock(bgdtEntry.inodeBitmapLocation, bitmapByteIndex, 1))[0]

@@ -105,8 +105,8 @@ class _BGDT(object):
     and returns the new object."""
 
     startPos = (bgNumCopy * superblock.numBlocksPerGroup + superblock.firstDataBlockId + 1) * superblock.blockSize
-    numBgdtBlocks = int(ceil(float(superblock.numBlockGroups * 32) / superblock.blockSize))
-    inodeTableBlocks = int(ceil(float(superblock.numInodesPerGroup * superblock.inodeSize) / superblock.blockSize))
+    numBgdtBlocks = int(ceil(float(superblock.numBlockGroups * 32) // superblock.blockSize))
+    inodeTableBlocks = int(ceil(float(superblock.numInodesPerGroup * superblock.inodeSize) // superblock.blockSize))
 
     bgdtBytes = ""
     for bgroupNum in range(superblock.numBlockGroups):
@@ -188,6 +188,7 @@ class _BGDT(object):
     """Reads a BDGT at the specified group number and returns the new object."""
     startPos = (groupId * superblock.numBlocksPerGroup + superblock.firstDataBlockId + 1) * superblock.blockSize
     tableSize = superblock.numBlockGroups * 32
+    #print(tableSize,type(tableSize))
     bgdtBytes = device.read(startPos, tableSize)
     if len(bgdtBytes) < tableSize:
       raise FilesystemError("Invalid block group descriptor table.")

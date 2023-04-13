@@ -47,7 +47,7 @@ class _EntryList(object):
     return self
   
   
-  def next(self):
+  def __next__(self):
     """Gets the next entry in the linked list."""
     if self._itIndex == len(self._entries):
       raise StopIteration
@@ -253,7 +253,8 @@ class Ext2Directory(Ext2File):
     """Looks up and returns the file specified by the relative path from this directory. Raises a
     FileNotFoundError if the file cannot be found."""
     
-    pathParts = re.compile("/+").split(relativePath)
+    #pathParts = re.compile("/+").split(relativePath)
+    pathParts = re.compile(b"/+").split(relativePath)
     if len(pathParts) > 1 and pathParts[0] == "":
       del pathParts[0]
     if len(pathParts) > 1 and pathParts[-1] == "":
@@ -272,7 +273,7 @@ class Ext2Directory(Ext2File):
             curFile = Ext2Directory._openEntry(entry, self._fs)
             while curFile.isSymlink and followSymlinks:
               linkedPath = curFile.getLinkedPath()
-              if linkedPath.startswith("/"):
+              if linkedPath.startswith(b"/"):
                 curFile = self._fs.rootDir.getFileAt(linkedPath[1:])
               else:
                 curFile = curFile.parentDir.getFileAt(linkedPath)
@@ -461,7 +462,7 @@ class Ext2Directory(Ext2File):
     if name == "." or name == "..":
       raise FilesystemError("Invalid name specified.")
 
-    if "/" in name or "\0" in name:
+    if b"/" in name or b"\0" in name:
       raise FilesystemError("Name contains invalid characters.")
 
     # make sure destination does not already exist

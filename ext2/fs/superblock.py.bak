@@ -311,7 +311,7 @@ class _Superblock(object):
     numInodesPerGroup = blockSize * 8
     numResBlocks = int(numBlocks * 0.05)
     numBlocksPerGroup = blockSize * 8
-    numBlockGroups = int(ceil(float(numBlocks) // numBlocksPerGroup))
+    numBlockGroups = int(ceil(float(numBlocks) / numBlocksPerGroup))
 
     if blockSize > 1024:
       firstBlockId = 0
@@ -465,7 +465,7 @@ class _Superblock(object):
     self._defResUid = fields[23]
     self._defResGid = fields[24]
 
-    self._numBlockGroups = int(ceil(float(self._numBlocks) / self._numBlocksPerGroup))
+    self._numBlockGroups = int(ceil(float(self._numBlocks) // self._numBlocksPerGroup))
 
 
     # read additional fields
@@ -490,7 +490,7 @@ class _Superblock(object):
       self._defHashVersion = None
       self._defMountOptions = None
       self._firstMetaGroupId = None
-      self._copyBlockGroupIds = list(range(self._numBlockGroups))
+      self._copyBlockGroupIds = range(self._numBlockGroups)
 
     else:
       fields = unpack_from("<I2H3I16s16s64sI2B2x16s3I4IB3x2I", sbBytes, 84)
@@ -500,13 +500,13 @@ class _Superblock(object):
       self._featuresCompatible = fields[3]
       self._featuresIncompatible = fields[4]
       self._featuresReadOnlyCompatible = fields[5]
-      self._volumeid = fields[6].rstrip(b'\0')
-      self._volName = fields[7].rstrip(b'\0')
-      self._lastMountPath = fields[8].rstrip(b'\0')
+      self._volumeId = fields[6].rstrip('\0')
+      self._volName = fields[7].rstrip('\0')
+      self._lastMountPath = fields[8].rstrip('\0')
       self._compAlgorithms = fields[9]
       self._numPreallocateBlocksFile = fields[10]
       self._numPreallocateBlocksDir = fields[11]
-      self._journalSuperblockUuid = fields[12].rstrip(b'\0')
+      self._journalSuperblockUuid = fields[12].rstrip('\0')
       self._journalFileInodeNum = fields[13]
       self._journalFileDev = fields[14]
       self._lastOrphanInodeNum = fields[15]
