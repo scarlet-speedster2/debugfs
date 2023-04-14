@@ -1,43 +1,36 @@
-import subprocess
-from PyQt6.QtWidgets import QApplication, QMainWindow, QMenuBar, QMenu, QTextEdit
-from passwd import PasswordDialog
-from stats import display_ext2_info
+from PyQt5 import QtCore, QtGui, QtWidgets
 
-class MainWindow(QMainWindow):
-    def __init__(self):
-        super().__init__()
-        self.initUI()
-        super().setWindowTitle("Debugfs")
 
-    def initUI(self):
-        # Create a text editor widget
-        self.textEdit = QTextEdit(self)
-        self.setCentralWidget(self.textEdit)
+class Ui_MainWindow(object):
+    def setupUi(self, MainWindow):
+        MainWindow.setObjectName("MainWindow")
+        MainWindow.resize(800, 600)
+        self.centralwidget = QtWidgets.QWidget(MainWindow)
+        self.centralwidget.setObjectName("centralwidget")
+        self.frame = QtWidgets.QFrame(self.centralwidget)
+        self.frame.setGeometry(QtCore.QRect(10, 0, 741, 551))
+        self.frame.setFrameShape(QtWidgets.QFrame.StyledPanel)
+        self.frame.setFrameShadow(QtWidgets.QFrame.Raised)
+        self.frame.setObjectName("frame")
+        self.treeView = QtWidgets.QTreeView(self.frame)
+        self.treeView.setGeometry(QtCore.QRect(10, 10, 711, 511))
+        self.treeView.setObjectName("treeView")
+        MainWindow.setCentralWidget(self.centralwidget)
+        self.menubar = QtWidgets.QMenuBar(MainWindow)
+        self.menubar.setGeometry(QtCore.QRect(0, 0, 800, 22))
+        self.menubar.setObjectName("menubar")
+        MainWindow.setMenuBar(self.menubar)
+        self.statusbar = QtWidgets.QStatusBar(MainWindow)
+        self.statusbar.setObjectName("statusbar")
+        MainWindow.setStatusBar(self.statusbar)
 
-        # Create a menu bar
-        menuBar = QMenuBar(self)
-        self.setMenuBar(menuBar)
+        self.retranslateUi(MainWindow)
+        QtCore.QMetaObject.connectSlotsByName(MainWindow)
 
-        # Create a "File" menu
-        fileMenu = QMenu('File', self)
-        menuBar.addMenu(fileMenu)
+    def retranslateUi(self, MainWindow):
+        _translate = QtCore.QCoreApplication.translate
+        MainWindow.setWindowTitle(_translate("MainWindow", "MainWindow"))
 
-        # Create a "Run Stats" action in the "File" menu
-        runStatsAction = fileMenu.addAction('Stats')
-        runStatsAction.triggered.connect(self.runStats)
-
-        # Set the window title and show the window
-        self.setWindowTitle('MainWindow')
-        self.show()
-
-    def runStats(self):
-        # Run debugfs with the stats command and capture the output
-        
-        stats_output = display_ext2_info()
-        
-
-        # Update the text editor with the output
-        self.textEdit.setText(stats_output)
 
 
 
