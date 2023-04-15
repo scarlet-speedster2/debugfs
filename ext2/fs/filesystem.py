@@ -505,7 +505,7 @@ class Ext2Filesystem(object):
     bitmaps = []
     for bgdtEntry in self._bgdt.entries:
       bitmapStartPos = bgdtEntry.inodeBitmapLocation * self._superblock.blockSize
-      bitmapSize = self._superblock.numInodesPerGroup / 8
+      bitmapSize = self._superblock.numInodesPerGroup // 8
       bitmapBytes = self._device.read(bitmapStartPos, bitmapSize)
       if len(bitmapBytes) < bitmapSize:
         raise FilesystemError("Invalid inode bitmap.")
@@ -530,7 +530,7 @@ class Ext2Filesystem(object):
     bitmaps = []
     for bgdtEntry in self._bgdt.entries:
       bitmapStartPos = bgdtEntry.blockBitmapLocation * self._superblock.blockSize
-      bitmapSize = self._superblock.numBlocksPerGroup / 8
+      bitmapSize = self._superblock.numBlocksPerGroup // 8
       bitmapBytes = self._device.read(bitmapStartPos, bitmapSize)
       if len(bitmapBytes) < bitmapSize:
         raise FilesystemError("Invalid block bitmap.")
@@ -564,7 +564,7 @@ class Ext2Filesystem(object):
     """Frees the block specified by the given block id."""
     groupNum = (bid - self._superblock.firstDataBlockId) / self._superblock.numBlocksPerGroup
     indexInGroup = (bid - self._superblock.firstDataBlockId) % self._superblock.numBlocksPerGroup
-    byteIndex = indexInGroup / 8
+    byteIndex = indexInGroup // 8
     bitIndex = indexInGroup % 8
 
     bgdtEntry = self._bgdt.entries[groupNum]
@@ -578,7 +578,7 @@ class Ext2Filesystem(object):
 
   def _allocateBlock(self, zeros = False):
     """Allocates the first free block and returns its id."""
-    bitmapSize = self._superblock.numBlocksPerGroup / 8
+    bitmapSize = self._superblock.numBlocksPerGroup // 8
     bitmapStartPos = None
     bgdtEntry = None
     groupNum = 0

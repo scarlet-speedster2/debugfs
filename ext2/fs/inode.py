@@ -272,7 +272,7 @@ class _Inode(object):
       self._uid |= (osFields[1] << 16)
       self._gid |= (osFields[2] << 16)
 
-    self._numIdsPerBlock = self._superblock.blockSize / 4
+    self._numIdsPerBlock = self._superblock.blockSize // 4
     self._numDirectBlocks = 12
     self._numIndirectBlocks = self._numDirectBlocks + self._numIdsPerBlock
     self._numDoublyIndirectBlocks = self._numIndirectBlocks + self._numIdsPerBlock ** 2
@@ -364,15 +364,15 @@ class _Inode(object):
       elif index < self._numDoublyIndirectBlocks:
         indirectList = self.__getBidListAtBid(self.blocks[13])
         index -= self._numIndirectBlocks # get index from start of doubly indirect list
-        directList = self.__getBidListAtBid(indirectList[index / self._numIdsPerBlock])
+        directList = self.__getBidListAtBid(indirectList[index // self._numIdsPerBlock])
         return directList[index % self._numIdsPerBlock]
 
       elif index < self._numTreblyIndirectBlocks:
         doublyIndirectList = self.__getBidListAtBid(self.blocks[14])
         index -= self._numDoublyIndirectBlocks # get index from start of trebly indirect list
-        indirectList = self.__getBidListAtBid(doublyIndirectList[index / (self._numIdsPerBlock ** 2)])
+        indirectList = self.__getBidListAtBid(doublyIndirectList[index // (self._numIdsPerBlock ** 2)])
         index %= (self._numIdsPerBlock ** 2) # get index from start of indirect list
-        directList = self.__getBidListAtBid(indirectList[index / self._numIdsPerBlock])
+        directList = self.__getBidListAtBid(indirectList[index // self._numIdsPerBlock])
         return directList[index % self._numIdsPerBlock]
       
       return 0
@@ -425,7 +425,7 @@ class _Inode(object):
       indirectList = self.__getBidListAtBid(self.blocks[13])
       
       index = self._numDataBlocks - self._numIndirectBlocks - 2
-      indirectIndex = index / (self._numIdsPerBlock + 1)
+      indirectIndex = index // (self._numIdsPerBlock + 1)
       directIndex = index % (self._numIdsPerBlock + 1) - 1
       
       if indirectList[indirectIndex] == 0:
@@ -453,7 +453,7 @@ class _Inode(object):
       
       
       numDoublyIndirectBlocks = self._numIdsPerBlock ** 2 + self._numIdsPerBlock + 1
-      doublyIndirectIndex = index / numDoublyIndirectBlocks
+      doublyIndirectIndex = index // numDoublyIndirectBlocks
       
       
       if doublyIndirectList[doublyIndirectIndex] == 0:
@@ -463,7 +463,7 @@ class _Inode(object):
         index += 1
       indirectList = self.__getBidListAtBid(doublyIndirectList[doublyIndirectIndex])
       
-      indirectIndex = ((index - numDoublyIndirectBlocks - 1) % numDoublyIndirectBlocks) / (self._numIdsPerBlock + 1)
+      indirectIndex = ((index - numDoublyIndirectBlocks - 1) % numDoublyIndirectBlocks) // (self._numIdsPerBlock + 1)
       
       if indirectList[indirectIndex] == 0:
         indirectList[indirectIndex] = self._fs._allocateBlock(True)

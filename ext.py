@@ -11,6 +11,7 @@ from time import sleep, perf_counter
 from threading import Thread
 from collections import deque
 from ext2 import *
+from constants import FileName
 
 
 class FilesystemNotSupportedError(Exception):
@@ -227,7 +228,7 @@ def printDirectory(directory, recursive, showAll, longList, showTypeCharacters, 
   """Prints the specified directory according to the given parameters."""
   if not directory.fsType == "EXT2":
     raise FilesystemNotSupportedError()
-  
+  op = ''
   q = deque([])
   q.append(directory)
   while len(q) > 0:
@@ -254,7 +255,7 @@ def printDirectory(directory, recursive, showAll, longList, showTypeCharacters, 
     files = sorted(files, key=lambda f: f.name)
     
     if recursive:
-      print("{0}:".format(d.absolutePath))
+      op += ("{0}:".format(d.absolutePath))
     
     for f in files:
       
@@ -267,7 +268,7 @@ def printDirectory(directory, recursive, showAll, longList, showTypeCharacters, 
             name = "{0}@".format(name)
           elif f.isRegular and f.isExecutable:
             name = "{0}*".format(name)
-        print(name)
+        op += name
         
       else:
         inodeStr = ""
@@ -298,8 +299,10 @@ def printDirectory(directory, recursive, showAll, longList, showTypeCharacters, 
         else:
           time = f.timeModified.ljust(17)
 
-        print("{0}{1} {2} {3} {4} {5} {6} {7}".format(inodeStr, f.modeStr, numLinks, uid, gid, size, time, name))
-    print()
+        op += ("{0}{1} {2} {3} {4} {5} {6} {7}".format(inodeStr, f.modeStr, numLinks, uid, gid, size, time, name))
+    op += '\n'
+    #print(op)
+    return op
 
 
 
@@ -422,12 +425,9 @@ def parseNewPath(fs, directory, path):
   return (parentDir, name)
 
 
-def shell(fs):
+def shell(inputline,fs):
   """Enters a command-line shell with commands for operating on the specified filesystem."""
   workingDir = fs.rootDir
-  print("Entered shell mode. Type 'help' for shell commands.")
-  
-  
   def __parseInput(inputline):
     #print(type(inputline))
     if inputline.endswith("\\") and not inputline.endswith("\\\\"):
@@ -478,7 +478,8 @@ def shell(fs):
   
   
   while True:
-    inputline = input(": '{0}' >> ".format(workingDir.absolutePath)).rstrip()
+    #inputline = input(": '{0}' >> ".format(workingDir.absolutePath)).rstrip()
+
     if len(inputline) == 0:
       continue
     
@@ -495,16 +496,20 @@ def shell(fs):
         break
         
       elif cmd == "pwd":
-        print(workingDir.absolutePath)
+        return (workingDir.absolutePath)
       
       elif cmd == "ls":
         if len(parameters) == 0:
-          printDirectory(workingDir, "R" in flags, "a" in flags, "l" in flags, "F" in flags,
+          op = printDirectory(workingDir, "R" in flags, "a" in flags, "l" in flags, "F" in flags,
                          "i" in flags, "u" in flags, "U" in flags)
+          print(op)
+          return op
         elif len(parameters) == 1:
           lsDir = getFileObject(fs, workingDir, parameters[0], True)
-          printDirectory(lsDir, "R" in flags, "a" in flags, "l" in flags, "F" in flags,
+          op = printDirectory(lsDir, "R" in flags, "a" in flags, "l" in flags, "F" in flags,
                          "i" in flags, "u" in flags, "U" in flags)
+          print(op)
+          return op
         else:
           raise ShellError("Invalid parameters.")
         
@@ -779,128 +784,18 @@ def fetchFile(fs, srcFilename, destDirectory, showWaitIndicator = True):
 #   else:
 #     mbps = 0
 #   print "Wrote {0} bytes at {1:.2f} MB/sec.".format(written, mbps)
-
-  
-
-
-
-# ========= MAIN APPLICATION ==============================================
-
-def printHelp():
-  """Prints the help screen for the main application, with usage and command options."""
-  sp = 26
-  print("Usage: {0} image_file options".format(sys.argv[0]))
-  print()
-  print("Options:")
-  print("{0}{1}".format("-s".ljust(sp), "Enters shell mode."))
-  print("{0}{1}".format("-h".ljust(sp), "Prints this message and exits."))
-  print("{0}{1}".format("-f filepath [hostdir]".ljust(sp), "Fetches the specified file from the filesystem"))
-  print("{0}{1}".format("".ljust(sp), "into the optional host directory. If no directory"))
-  print("{0}{1}".format("".ljust(sp), "is specified, defaults to the current directory."))
-  print()
-  print("{0}{1}".format("-p hostfile destpath".ljust(sp), "Puts the specified host file into the specified"))
-  print("{0}{1}".format("".ljust(sp), "directory on the filesystem."))
-  print()
-  print("{0}{1}".format("-i".ljust(sp), "Prints general information about the filesystem."))
-  print("{0}{1}".format("-d".ljust(sp), "Scans the filesystem and prints detailed space"))
-  print("{0}{1}".format("".ljust(sp), "usage information."))
-  print()
-  print("{0}{1}".format("-c".ljust(sp), "Checks the filesystem's integrity and prints a"))
-  print("{0}{1}".format("".ljust(sp), "detailed integrity report."))
-  print()
-  print("{0}{1}".format("-n blockSize numBlocks".ljust(sp), "Creates the specified image file as a new ext2"))
-  print("{0}{1}".format("".ljust(sp), "image with the specified parameters."))
-  print()
-  print("{0}{1}".format("-w".ljust(sp), "Suppress the wait indicator that is typically"))
-  print("{0}{1}".format("".ljust(sp), "shown for long operations. This is useful when"))
-  print("{0}{1}".format("".ljust(sp), "redirecting the output of this program."))
-  print()
-
-
-def run(args, fs):
-  """Runs the program on the specified filesystem with the given command line arguments."""
-  showHelp = ("-h" in args)
-  enterShell = ("-s" in args)
-  showGeneralInfo = ("-i" in args)
-  showDetailedInfo = ("-d" in args)
-  showIntegrityCheck = ("-c" in args)
-  #suppressIndicator = ("-w" in args)
-  fetch = ("-f" in args)
-  #put = ("-p" in args)
-  
-  if showHelp or not (showGeneralInfo or enterShell or showDetailedInfo or showIntegrityCheck or fetch or put):
-    printHelp()
-    quit()
-  
-  else:
-    info = []
-    if showGeneralInfo:
-      info.extend(getGeneralInfo(fs))
-    if showDetailedInfo:
-      #info.extend(generateDetailedInfo(fs, not suppressIndicator))
-      info.extend(generateDetailedInfo(fs))
-    if showIntegrityCheck:
-      info.extend(generateIntegrityReport(fs))
-    if len(info) > 0:
-      printInfoPairs(info)
-      
-    # if put:
-    #   srcNameIndex = args.index("-p") + 1
-    #   destNameIndex = srcNameIndex + 1
-    #   if len(args) <= srcNameIndex:
-    #     print "Error! No source file specified."
-    #   elif len(args) <= destNameIndex:
-    #     print "Error! No destination directory specified."
-    #   # else:
-    #   #   try:
-    #   #     putFile(fs, args[srcNameIndex], args[destNameIndex])
-    #   #   except FilesystemError as e:
-    #   #     print "Error! {0}".format(e)
-    
-    if fetch:
-      srcNameIndex = args.index("-f") + 1
-      destNameIndex = srcNameIndex + 1
-      if len(args) <= srcNameIndex:
-        print("Error! No source file specified.")
-      else:
-        if len(args) <= destNameIndex:
-          destDirectory = "."
-        elif args[destNameIndex][0] == "-":
-          destDirectory = "."
-        else:
-          destDirectory = args[destNameIndex]
-        try:
-          fetchFile(fs, args[srcNameIndex], destDirectory)
-        except FilesystemError as e:
-          print("Error! {0}".format(e))
-    
-    if enterShell:
-      shell(fs)
-
-
-
-def main():
+def main(ip):
   """Main entry point of the application."""
   fs = None
-  args = list(sys.argv)
-  if len(args) < 3:
-    printHelp()
-    quit()
-  elif args[1][0] == "-":
-    printHelp()
-    quit()
-  else:
-    filename = args[1]
-    del args[0:1]
-    
+  try:
+    fs = Ext2Filesystem.fromImageFile(FileName)
+    with fs:
 
-    try:
-      fs = Ext2Filesystem.fromImageFile(filename)
-      with fs:
-        run(args, fs)
-    except IOError:
-      print("Could not read device file .")
+      op = shell(ip, fs)
+      return op
+  except IOError:
+      return("Could not read device file .")
 
 
 
-main()
+
