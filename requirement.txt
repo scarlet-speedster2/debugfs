@@ -1,3 +1,5 @@
 fs
-PyQt6
+PyQt5
+pyside2
+
 

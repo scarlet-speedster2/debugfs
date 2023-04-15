@@ -17,6 +17,8 @@ class DebugfsBrowser(Mainwindow.Ui_MainWindow,QtWidgets.QMainWindow):
         runStatsAction = fileMenu.addAction('Stats')
         runStatsAction.triggered.connect(self.runStats)
 
+
+
     def runStats(self):
         # Run debugfs with the stats command and capture the output
 
