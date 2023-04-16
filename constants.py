@@ -1,5 +1,6 @@
-FileName='/dev/sda3'
-op = ''
+FileName=''
+mountloc=''
+
 
 
 

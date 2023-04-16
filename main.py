@@ -1,11 +1,13 @@
 import sys
 import os
 import platform
+import constants
 from PySide2 import QtCore, QtGui, QtWidgets
 from PySide2.QtCore import (QCoreApplication, QPropertyAnimation, QDate, QDateTime, QMetaObject, QObject, QPoint, QRect, QSize, QTime, QUrl, Qt, QEvent)
 from PySide2.QtGui import (QBrush, QColor, QConicalGradient, QCursor, QFont, QFontDatabase, QIcon, QKeySequence, QLinearGradient, QPalette, QPainter, QPixmap, QRadialGradient)
 from PySide2.QtWidgets import *
 
+import constants
 # Import user interface file
 from MainWindow import *
 
@@ -77,9 +79,16 @@ class MainWindow(QMainWindow):
         #################################################################################
         # Window Size grip
         # Show window
+        self.populate()
         self.show()
         # ###############################################
 
+    def populate(self):
+        path = constants.mountloc
+        model = QtWidgets.QFileSystemModel()
+        model.setRootPath(QtCore.QDir.rootPath())
+        self.ui.treeView.setModel(model)
+        self.ui.treeView.setRootIndex(model.index(path))
     def applyButtonStyle(self):
         # Reset style for other buttons
         for w in self.ui.left_side_menu.findChildren(QPushButton):
@@ -150,6 +159,8 @@ class MainWindow(QMainWindow):
 
 
 if __name__ == "__main__":
+    constants.FileName = sys.argv[1]
+    constants.mountloc = sys.argv[2]
     app = QApplication(sys.argv)
     window = MainWindow()
     sys.exit(app.exec_())
