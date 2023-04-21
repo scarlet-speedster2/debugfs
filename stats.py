@@ -1,5 +1,6 @@
 import os
 from constants import FileName
+import constants
 # Constants
 SUPERBLOCK_OFFSET = 1024
 SUPERBLOCK_SIZE = 1024
@@ -17,7 +18,8 @@ def read_int(fd, offset, size):
 
 # Main function
 def display_ext2_info():
-    with open(FileName, "rb") as fd:
+
+    with open(constants.FileName,"rb") as fd:
         output = ""
         # Read superblock information
         inodes_count = read_int(fd, SUPERBLOCK_OFFSET + 0, 4)

@@ -3,17 +3,17 @@
 from PySide2.QtCore import *
 from PySide2.QtGui import *
 from PySide2.QtWidgets import *
-
+import stats
 
 
 class Ui_MainWindow(object):
     def setupUi(self, MainWindow):
         if not MainWindow.objectName():
             MainWindow.setObjectName(u"MainWindow")
-        MainWindow.resize(1007, 656)
+        MainWindow.resize(894, 588)
         self.centralwidget = QWidget(MainWindow)
         self.centralwidget.setObjectName(u"centralwidget")
-        self.centralwidget.setStyleSheet(u"background-color: rgb(100, 100, 100);")#25,25,25
+        self.centralwidget.setStyleSheet(u"background-color: rgb(25, 25, 25);")
         self.verticalLayout = QVBoxLayout(self.centralwidget)
         self.verticalLayout.setSpacing(0)
         self.verticalLayout.setObjectName(u"verticalLayout")
@@ -24,7 +24,7 @@ class Ui_MainWindow(object):
         self.main_header.setStyleSheet(u"QFrame{\n"
 "	border-bottom: 1px solid #000;\n"
 "	\n"
-"	background-color: rgb(0, 0, 0);\n" #change
+"	background-color: rgb(0, 0, 0);\n"
 "}")
         self.main_header.setFrameShape(QFrame.WinPanel)
         self.main_header.setFrameShadow(QFrame.Raised)
@@ -167,7 +167,7 @@ class Ui_MainWindow(object):
         self.left_side_menu.setObjectName(u"left_side_menu")
         self.left_side_menu.setMaximumSize(QSize(50, 16777215))
         self.left_side_menu.setStyleSheet(u"QFrame{\n"
-"	background-color: #000;\n"  #changed previous #000
+"	background-color: #000;\n"
 "}\n"
 "QPushButton{\n"
 "	padding: 20px 10px;\n"
@@ -200,6 +200,16 @@ class Ui_MainWindow(object):
         self.formLayout.setHorizontalSpacing(0)
         self.formLayout.setVerticalSpacing(0)
         self.formLayout.setContentsMargins(0, 0, 0, 0)
+        self.accounts_button = QPushButton(self.left_menu_top_buttons)
+        self.accounts_button.setObjectName(u"accounts_button")
+        self.accounts_button.setMinimumSize(QSize(100, 0))
+        self.accounts_button.setStyleSheet(u"background-image: url(./icons/cil-zoom-in.png);\n"
+"background-repeat: none;\n"
+"padding-left: 50px;\n"
+"background-position: center left;")
+
+        self.formLayout.setWidget(2, QFormLayout.SpanningRole, self.accounts_button)
+
         self.home_button = QPushButton(self.left_menu_top_buttons)
         self.home_button.setObjectName(u"home_button")
         self.home_button.setMinimumSize(QSize(100, 0))
@@ -211,7 +221,17 @@ class Ui_MainWindow(object):
 "border-left: 2px solid  rgb(0, 136, 255);\n"
 "border-bottom: 2px solid  rgb(0, 136, 255);")
 
-        self.formLayout.setWidget(0, QFormLayout.SpanningRole, self.home_button)
+        self.formLayout.setWidget(0, QFormLayout.FieldRole, self.home_button)
+
+        self.settings_button = QPushButton(self.left_menu_top_buttons)
+        self.settings_button.setObjectName(u"settings_button")
+        self.settings_button.setMinimumSize(QSize(100, 0))
+        self.settings_button.setStyleSheet(u"background-image: url(./icons/cil-notes.png);\n"
+"background-repeat: none;\n"
+"padding-left: 50px;\n"
+"background-position: center left;")
+
+        self.formLayout.setWidget(1, QFormLayout.FieldRole, self.settings_button)
 
 
         self.verticalLayout_3.addWidget(self.left_menu_top_buttons)
@@ -235,25 +255,42 @@ class Ui_MainWindow(object):
         self.home_page.setStyleSheet(u"")
         self.verticalLayout_7 = QVBoxLayout(self.home_page)
         self.verticalLayout_7.setObjectName(u"verticalLayout_7")
-        self.treeView = QTreeView(self.home_page)
-        self.treeView.setObjectName(u"treeView")
+        self.treeWidget = QTreeWidget(self.home_page)
+        __qtreewidgetitem = QTreeWidgetItem()
+        __qtreewidgetitem.setText(0, u"1");
+        self.treeWidget.setHeaderItem(__qtreewidgetitem)
+        self.treeWidget.setObjectName(u"treeWidget")
 
-        self.verticalLayout_7.addWidget(self.treeView)
+        self.verticalLayout_7.addWidget(self.treeWidget)
 
         self.stackedWidget.addWidget(self.home_page)
-        self.Page = QWidget()
-        self.Page.setObjectName(u"Page")
-        self.Page.setStyleSheet(u"")
-        self.verticalLayout_6 = QVBoxLayout(self.Page)
+        self.accounts_page = QWidget()
+        self.accounts_page.setObjectName(u"accounts_page")
+        self.accounts_page.setStyleSheet(u"")
+        self.verticalLayout_6 = QVBoxLayout(self.accounts_page)
         self.verticalLayout_6.setSpacing(10)
         self.verticalLayout_6.setObjectName(u"verticalLayout_6")
-        self.stackedWidget.addWidget(self.Page)
-        self.Page2 = QWidget()
-        self.Page2.setObjectName(u"Page2")
-        self.Page2.setStyleSheet(u"")
-        self.verticalLayout_5 = QVBoxLayout(self.Page2)
+        self.stackedWidget.addWidget(self.accounts_page)
+        self.settings_page = QWidget()
+        self.settings_page.setObjectName(u"settings_page")
+        self.settings_page.setStyleSheet(u"")
+        self.verticalLayout_5 = QVBoxLayout(self.settings_page)
         self.verticalLayout_5.setObjectName(u"verticalLayout_5")
-        self.stackedWidget.addWidget(self.Page2)
+        #self.label_4 = QLabel(self.settings_page)
+        self.label_4 = QTextEdit(self.settings_page)
+        self.label_4.setObjectName(u"label_4")
+        font1 = QFont()
+        #font1.setPointSize(50)
+        font1.setPointSize(15)
+        font1.setBold(True)
+        font1.setWeight(75)
+        self.label_4.setFont(font1)
+        self.label_4.setStyleSheet(u"background-color: rgb(144, 144, 144);")
+        self.label_4.setAlignment(Qt.AlignCenter)
+
+        self.verticalLayout_5.addWidget(self.label_4)
+
+        self.stackedWidget.addWidget(self.settings_page)
 
         self.verticalLayout_2.addWidget(self.stackedWidget)
 
@@ -263,8 +300,7 @@ class Ui_MainWindow(object):
         self.right_side_menu = QFrame(self.main_body)
         self.right_side_menu.setObjectName(u"right_side_menu")
         self.right_side_menu.setMaximumSize(QSize(100, 16777215))
-        self.right_side_menu.setStyleSheet(u"background-color: rgb(0,0,0);")
-        #self.right_side_menu.setStyleSheet(u"background-color: rgb(255,255,255);")
+        self.right_side_menu.setStyleSheet(u"background-color: rgb(0, 0, 0);")
         self.right_side_menu.setFrameShape(QFrame.NoFrame)
         self.right_side_menu.setFrameShadow(QFrame.Raised)
         self.verticalLayout_4 = QVBoxLayout(self.right_side_menu)
@@ -320,11 +356,14 @@ class Ui_MainWindow(object):
     def retranslateUi(self, MainWindow):
         MainWindow.setWindowTitle(QCoreApplication.translate("MainWindow", u"MainWindow", None))
         self.left_menu_toggle_btn.setText("")
-        self.label_6.setText(QCoreApplication.translate("MainWindow", u"Debugsfs Browser", None))
+        self.label_6.setText(QCoreApplication.translate("MainWindow", u"Debugfs Browser", None))
         self.restoreButton.setText("")
         self.minimizeButton.setText("")
         self.closeButton.setText("")
+        self.accounts_button.setText(QCoreApplication.translate("MainWindow", u"Zoom", None))
         self.home_button.setText(QCoreApplication.translate("MainWindow", u"HOME", None))
+        self.settings_button.setText(QCoreApplication.translate("MainWindow", u"Stats", None))
+        self.label_4.setText(QCoreApplication.translate("MainWindow", stats.display_ext2_info(),None))
         self.label_7.setText(QCoreApplication.translate("MainWindow", u"v 1.0", None))
     # retranslateUi
 

@@ -1,18 +1,21 @@
+
+
 import sys
 import os
 import platform
-import constants
 from PySide2 import QtCore, QtGui, QtWidgets
 from PySide2.QtCore import (QCoreApplication, QPropertyAnimation, QDate, QDateTime, QMetaObject, QObject, QPoint, QRect, QSize, QTime, QUrl, Qt, QEvent)
 from PySide2.QtGui import (QBrush, QColor, QConicalGradient, QCursor, QFont, QFontDatabase, QIcon, QKeySequence, QLinearGradient, QPalette, QPainter, QPixmap, QRadialGradient)
 from PySide2.QtWidgets import *
 
 import constants
+constants.FileName = sys.argv[1]
 # Import user interface file
 from MainWindow import *
 
 # Global value for the windows status
 WINDOW_SIZE = 0;
+# This will help us determine if the window is minimized or maximized
 
 # Main class
 class MainWindow(QMainWindow):
@@ -21,7 +24,11 @@ class MainWindow(QMainWindow):
         self.ui = Ui_MainWindow()
         self.ui.setupUi(self)
 
-        self.setWindowTitle("Debugfs Browser")
+        # Set window Icon
+        # This icon and title will not appear on our app main window because we removed the title bar
+        self.setWindowIcon(QtGui.QIcon(":/images/images/nike_logo.png"))
+        # Set window tittle
+        self.setWindowTitle("Nike Desk-Top App")
 
         # Remove window tlttle bar
         self.setWindowFlags(QtCore.Qt.FramelessWindowHint) 
@@ -46,19 +53,50 @@ class MainWindow(QMainWindow):
         self.ui.closeButton.clicked.connect(lambda: self.close())
         #Restore/Maximize window
         self.ui.restoreButton.clicked.connect(lambda: self.restore_or_maximize_window())
+        # ###############################################
+
+
+        # ###############################################
+        # Move window on mouse drag event on the tittle bar
+        # ###############################################
         def moveWindow(e):
+            # Detect if the window is  normal size
+            # ###############################################  
             if self.isMaximized() == False: #Not maximized
-                if e.buttons() == Qt.LeftButton:
+                # Move window only when window is normal size  
+                # ###############################################
+                #if left mouse button is clicked (Only accept left mouse button clicks)
+                if e.buttons() == Qt.LeftButton:  
                     #Move window 
                     self.move(self.pos() + e.globalPos() - self.clickPosition)
                     self.clickPosition = e.globalPos()
                     e.accept()
+            # ###############################################
+
+        
+        # ###############################################
+        # Add click event/Mouse move event/drag event to the top header to move the window
+        # ###############################################
         self.ui.main_header.mouseMoveEvent = moveWindow
+        # ###############################################
+
+
+
+
+
 
         # SLIDABLE LEFT MENU/////////////////
         #Left Menu toggle button
         self.ui.left_menu_toggle_btn.clicked.connect(lambda: self.slideLeftMenu())
-        #Set the page that will be visible by default when the app is opened
+        # ###############################################
+        # //////////////////////////////////////
+
+
+
+
+        ########################################################################
+        # STACKED PAGES (DEFAUT /CURRENT PAGE)/////////////////
+        #Set the page that will be visible by default when the app is opened 
         self.ui.stackedWidget.setCurrentWidget(self.ui.home_page)
         # ###############################################
         # //////////////////////////////////////
@@ -68,27 +106,32 @@ class MainWindow(QMainWindow):
 
         #navigate to Home page
         self.ui.home_button.clicked.connect(lambda: self.ui.stackedWidget.setCurrentWidget(self.ui.home_page))
+        
+
+        #navigate to Accounts page
+        self.ui.accounts_button.clicked.connect(lambda: self.ui.stackedWidget.setCurrentWidget(self.ui.accounts_page))
+        
+
+        #navigate to Stats page
+        self.ui.settings_button.clicked.connect(lambda: self.ui.stackedWidget.setCurrentWidget(self.ui.settings_page))
+    
+
 
 
 
         for w in self.ui.left_side_menu.findChildren(QPushButton):
             # Add click event listener
             w.clicked.connect(self.applyButtonStyle)
-        #################################################################################
-        QSizeGrip(self.ui.size_grip)
-        #################################################################################
-        # Window Size grip
-        # Show window
-        self.populate()
-        self.show()
-        # ###############################################
 
-    def populate(self):
-        path = constants.mountloc
-        model = QtWidgets.QFileSystemModel()
-        model.setRootPath(QtCore.QDir.rootPath())
-        self.ui.treeView.setModel(model)
-        self.ui.treeView.setRootIndex(model.index(path))
+
+
+        QSizeGrip(self.ui.size_grip)
+
+        self.show()
+
+
+
+
     def applyButtonStyle(self):
         # Reset style for other buttons
         for w in self.ui.left_side_menu.findChildren(QPushButton):
@@ -104,6 +147,11 @@ class MainWindow(QMainWindow):
                 # Apply the default style
                 w.setStyleSheet(defaultStyle)
                 #                 
+
+        # Apply new style to clicked button
+        # Sender = clicked button
+        # Get the clicked button stylesheet then add new left-border style to it
+        # Lets add the bottom border style
         newStyle = self.sender().styleSheet() + ("border-left: 2px solid  rgb(0, 136, 255);border-bottom: 2px solid  rgb(0, 136, 255);")
         # Apply the new style
         self.sender().setStyleSheet(newStyle)
@@ -111,9 +159,20 @@ class MainWindow(QMainWindow):
         return
 
 
-    # Add mouse events to the window
+
     def mousePressEvent(self, event):
+        # ###############################################
+        # Get the current position of the mouse
         self.clickPosition = event.globalPos()
+        # We will use this value to move the window
+        # ###############################################
+    # ###############################################
+
+
+
+
+
+
 
     # Restore or maximize your window
     def restore_or_maximize_window(self):
@@ -127,14 +186,26 @@ class MainWindow(QMainWindow):
         	self.showMaximized()
 
         	# Update button icon  when window is maximized
-        	self.ui.restoreButton.setIcon(QtGui.QIcon(u"./icons/cil-window-restore.png"))#Show minized icon
+        	self.ui.restoreButton.setIcon(QtGui.QIcon(u":/icons/icons/cil-window-restore.png"))#Show minized icon
         else:
         	# If the window is on its default size
             WINDOW_SIZE = 0 #Update value to show that the window has been minimized/set to normal size (which is 800 by 400)
             self.showNormal()
 
             # Update button icon when window is minimized
-            self.ui.restoreButton.setIcon(QtGui.QIcon(u"./icons/cil-window-maximize.png"))#Show maximize icon
+            self.ui.restoreButton.setIcon(QtGui.QIcon(u":/icons/icons/cil-window-maximize.png"))#Show maximize icon
+
+
+
+
+
+
+
+
+
+    ########################################################################
+    # Slide left menu
+    ########################################################################
     def slideLeftMenu(self):
         # Get current left menu width
         width = self.ui.left_side_menu.width()
@@ -156,13 +227,21 @@ class MainWindow(QMainWindow):
         self.animation.setEasingCurve(QtCore.QEasingCurve.InOutQuart)
         self.animation.start()
 
+    # //////////////////////////////////////////////////////////////////////
 
 
+
+
+
+
+
+# Execute app
+# 
 if __name__ == "__main__":
-    constants.FileName = sys.argv[1]
-    constants.mountloc = sys.argv[2]
     app = QApplication(sys.argv)
     window = MainWindow()
     sys.exit(app.exec_())
+else:
+	print(__name__, "Something is very wrong")
 
 
