@@ -13,7 +13,7 @@ class Ui_MainWindow(object):
         MainWindow.resize(894, 588)
         self.centralwidget = QWidget(MainWindow)
         self.centralwidget.setObjectName(u"centralwidget")
-        self.centralwidget.setStyleSheet(u"background-color: rgb(25, 25, 25);")
+        self.centralwidget.setStyleSheet(u"background-color: rgb(125, 125, 125);")#252525
         self.verticalLayout = QVBoxLayout(self.centralwidget)
         self.verticalLayout.setSpacing(0)
         self.verticalLayout.setObjectName(u"verticalLayout")
@@ -257,7 +257,7 @@ class Ui_MainWindow(object):
         self.verticalLayout_7.setObjectName(u"verticalLayout_7")
         self.treeWidget = QTreeWidget(self.home_page)
         __qtreewidgetitem = QTreeWidgetItem()
-        __qtreewidgetitem.setText(0, u"1");
+        __qtreewidgetitem.setText(0, u"Name");
         self.treeWidget.setHeaderItem(__qtreewidgetitem)
         self.treeWidget.setObjectName(u"treeWidget")
 
@@ -316,8 +316,8 @@ class Ui_MainWindow(object):
         self.main_footer.setMinimumSize(QSize(0, 50))
         self.main_footer.setMaximumSize(QSize(16777215, 30))
         self.main_footer.setStyleSheet(u"QFrame{\n"
-"	background-color: rgb(0, 0, 0);\n"
-"	border-top-color: solid 1px  rgb(0, 0, 0);\n"
+"	background-color: rgb(0, 0, 0);\n" #000
+"	border-top-color: solid 1px  rgb(0, 0, 0);\n" #000
 "}\n"
 "QLabel{\n"
 "	color: #fff;\n"
@@ -363,6 +363,13 @@ class Ui_MainWindow(object):
         self.accounts_button.setText(QCoreApplication.translate("MainWindow", u"Zoom", None))
         self.home_button.setText(QCoreApplication.translate("MainWindow", u"HOME", None))
         self.settings_button.setText(QCoreApplication.translate("MainWindow", u"Stats", None))
+        ___qtreewidgetitem = self.treeWidget.headerItem()
+        ___qtreewidgetitem.setText(6, QCoreApplication.translate("MainWindow", u"time", None));
+        ___qtreewidgetitem.setText(5, QCoreApplication.translate("MainWindow", u"gid", None));
+        ___qtreewidgetitem.setText(4, QCoreApplication.translate("MainWindow", u"uid", None));
+        ___qtreewidgetitem.setText(3, QCoreApplication.translate("MainWindow", u"numLinks", None));
+        ___qtreewidgetitem.setText(2, QCoreApplication.translate("MainWindow", u"Permissions", None));
+        ___qtreewidgetitem.setText(1, QCoreApplication.translate("MainWindow", u"Inode ", None));
         self.label_4.setText(QCoreApplication.translate("MainWindow", stats.display_ext2_info(),None))
         self.label_7.setText(QCoreApplication.translate("MainWindow", u"v 1.0", None))
     # retranslateUi
