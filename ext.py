@@ -7,14 +7,8 @@ from collections import deque
 from ext2 import *
 
 
-class FilesystemNotSupportedError(Exception):
-    """Thrown when the image's filesystem type is not supported."""
-    pass
 
 
-class ShellError(Exception):
-    """Thrown when the shell encounters an error."""
-    pass
 
 
 
@@ -121,8 +115,7 @@ def getFileObject(fs, directory, path, followSymlinks):
 
 
 def parseNewPath(fs, directory, path):
-    """Parses the given absolute path or path relative to the specified directory and returns the name of a file
-  and its parent directory."""
+
     parentDir = directory
     if path.startswith(b"/"):
         path = path[1:]
@@ -139,27 +132,17 @@ def parseNewPath(fs, directory, path):
 
 
 def shell(fs,workingDir,inputline):
-    """Enters a command-line shell with commands for operating on the specified filesystem."""
-   # workingDir = fs.rootDir
+
     def __parseInput(inputline):
         # print(type(inputline))
-        if inputline.endswith("\\") and not inputline.endswith("\\\\"):
-            raise ShellError("Invalid escape sequence.")
 
         parts = deque(inputline.split())
-        if len(parts) == 0:
-            raise ShellError("No command specified.")
         cmd = parts.popleft()
         flags = []
         parameters = []
 
         while len(parts) > 0:
             part = parts.popleft()
-            # print(part)
-            # jjprint(type(part))
-
-            if "\\" in part and not part.endswith("\\"):
-                raise ShellError("Invalid escape sequence.")
 
             if part.startswith("-") and len(parameters) == 0:
                 flags.extend(list(part[1:]))
@@ -171,8 +154,8 @@ def shell(fs,workingDir,inputline):
                 while not nextPart.endswith(quoteChar) and len(parts) > 0:
                     nextPart = parts.popleft()
                     param = "{0} {1}".format(param, nextPart)
-                if not param.endswith(quoteChar):
-                    raise ShellError("No closing quotation found.")
+
+
                 parameters.append(bytes(param[:-1], encoding='utf-8'))
 
             elif part.endswith("\\"):
@@ -215,28 +198,19 @@ def shell(fs,workingDir,inputline):
                     lsDir = getFileObject(fs, workingDir, parameters[0], True)
                     return printDirectory(lsDir, "R" in flags, "a" in flags, "l" in flags, "F" in flags,
                                    "i" in flags, "u" in flags, "U" in flags),workingDir
-                else:
-                    raise ShellError("Invalid parameters.")
+
 
             elif cmd == "cd":
-                if len(parameters) != 1:
-                    raise ShellError("Invalid parameters.")
+
                 cdDir = getFileObject(fs, workingDir, parameters[0], True)
                 if not cdDir.isDir:
-                    raise FilesystemError("Not a directory.")
+                    cdDir = getFileObject(fs,workingDir,'..',True)
                 workingDir = cdDir
-                return _,workingDir
+                return workingDir,workingDir
+        except Exception as e:
+            print(e)
 
 
-            else:
-                raise ShellError("Command not recognized.")
-        except ShellError as e:
-            print(e)
-            continue
-        except FileNotFoundError:
-            print("File not found.")
-            continue
-        except FilesystemError as e:
-            print(e)
-            continue
+
+
 

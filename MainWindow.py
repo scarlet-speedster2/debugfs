@@ -364,7 +364,8 @@ class Ui_MainWindow(object):
         self.home_button.setText(QCoreApplication.translate("MainWindow", u"HOME", None))
         self.settings_button.setText(QCoreApplication.translate("MainWindow", u"Stats", None))
         ___qtreewidgetitem = self.treeWidget.headerItem()
-        ___qtreewidgetitem.setText(6, QCoreApplication.translate("MainWindow", u"time", None));
+        ___qtreewidgetitem.setText(7, QCoreApplication.translate("MainWindow", u"time", None));
+        ___qtreewidgetitem.setText(6, QCoreApplication.translate("MainWindow", u"size", None));
         ___qtreewidgetitem.setText(5, QCoreApplication.translate("MainWindow", u"gid", None));
         ___qtreewidgetitem.setText(4, QCoreApplication.translate("MainWindow", u"uid", None));
         ___qtreewidgetitem.setText(3, QCoreApplication.translate("MainWindow", u"numLinks", None));

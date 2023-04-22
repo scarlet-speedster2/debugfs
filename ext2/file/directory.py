@@ -10,7 +10,7 @@ from .regularfile import Ext2RegularFile
 
 
 def _openRootDirectory(fs):
-  """Opens and returns the root directory of the specified filesystem."""
+
   return Ext2Directory._openEntry(None, fs)
 
 
@@ -169,8 +169,8 @@ class Ext2Directory(Ext2File):
     
     if (inode.mode & 0x4000) == 0x4000:
       return Ext2Directory(dirEntry, inode, fs)
-    if (inode.mode & 0xA000) == 0xA000:
-      return Ext2Symlink(dirEntry, inode, fs)
+    #if (inode.mode & 0xA000) == 0xA000:
+      #return Ext2Symlink(dirEntry, inode, fs)
     if (inode.mode & 0x8000) == 0x8000:
       return Ext2RegularFile(dirEntry, inode, fs)
 

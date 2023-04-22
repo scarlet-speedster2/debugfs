@@ -7,6 +7,12 @@ from PySide2 import QtCore, QtGui, QtWidgets
 from PySide2.QtCore import (QCoreApplication, QPropertyAnimation, QDate, QDateTime, QMetaObject, QObject, QPoint, QRect, QSize, QTime, QUrl, Qt, QEvent)
 from PySide2.QtGui import (QBrush, QColor, QConicalGradient, QCursor, QFont, QFontDatabase, QIcon, QKeySequence, QLinearGradient, QPalette, QPainter, QPixmap, QRadialGradient)
 from PySide2.QtWidgets import *
+from time import sleep, perf_counter
+from threading import Thread
+from collections import deque
+from PySide2.QtCore import Signal,QObject
+from ext2 import *
+import ext
 
 import constants
 constants.FileName = sys.argv[1]
@@ -23,12 +29,15 @@ class MainWindow(QMainWindow):
         QMainWindow.__init__(self)
         self.ui = Ui_MainWindow()
         self.ui.setupUi(self)
+        self.it = None
+        self.workingDir = None
+        self.fs = None
 
         # Set window Icon
         # This icon and title will not appear on our app main window because we removed the title bar
-        self.setWindowIcon(QtGui.QIcon(":/images/images/nike_logo.png"))
+        self.setWindowIcon(QtGui.QIcon(":/images/images/cil-4k.png"))
         # Set window tittle
-        self.setWindowTitle("Nike Desk-Top App")
+        self.setWindowTitle("Debugfs browser")
 
         # Remove window tlttle bar
         self.setWindowFlags(QtCore.Qt.FramelessWindowHint) 
@@ -45,7 +54,7 @@ class MainWindow(QMainWindow):
         # Appy shadow to central widget
         self.ui.centralwidget.setGraphicsEffect(self.shadow)
 
-        # Button click events to our top bar buttons
+
         # 
         #Minimize window
         self.ui.minimizeButton.clicked.connect(lambda: self.showMinimized())
@@ -53,11 +62,6 @@ class MainWindow(QMainWindow):
         self.ui.closeButton.clicked.connect(lambda: self.close())
         #Restore/Maximize window
         self.ui.restoreButton.clicked.connect(lambda: self.restore_or_maximize_window())
-        # ###############################################
-
-
-        # ###############################################
-        # Move window on mouse drag event on the tittle bar
         # ###############################################
         def moveWindow(e):
             # Detect if the window is  normal size
@@ -71,67 +75,39 @@ class MainWindow(QMainWindow):
                     self.move(self.pos() + e.globalPos() - self.clickPosition)
                     self.clickPosition = e.globalPos()
                     e.accept()
-            # ###############################################
-
-        
-        # ###############################################
-        # Add click event/Mouse move event/drag event to the top header to move the window
-        # ###############################################
         self.ui.main_header.mouseMoveEvent = moveWindow
-        # ###############################################
-
-
-
-
-
-
-        # SLIDABLE LEFT MENU/////////////////
         #Left Menu toggle button
         self.ui.left_menu_toggle_btn.clicked.connect(lambda: self.slideLeftMenu())
-        # ###############################################
-        # //////////////////////////////////////
-
-
-
-
-        ########################################################################
-        # STACKED PAGES (DEFAUT /CURRENT PAGE)/////////////////
-        #Set the page that will be visible by default when the app is opened 
         self.ui.stackedWidget.setCurrentWidget(self.ui.home_page)
-        # ###############################################
-        # //////////////////////////////////////
-
-        # STACKED PAGES NAVIGATION/////////////////
-        #Using side menu buttons
-
-        #navigate to Home page
         self.ui.home_button.clicked.connect(lambda: self.ui.stackedWidget.setCurrentWidget(self.ui.home_page))
-        
-
-        #navigate to Accounts page
         self.ui.accounts_button.clicked.connect(lambda: self.ui.stackedWidget.setCurrentWidget(self.ui.accounts_page))
         
-
-        #navigate to Stats page
         self.ui.settings_button.clicked.connect(lambda: self.ui.stackedWidget.setCurrentWidget(self.ui.settings_page))
-    
-
-
-
-
         for w in self.ui.left_side_menu.findChildren(QPushButton):
             # Add click event listener
             w.clicked.connect(self.applyButtonStyle)
 
-
-
         QSizeGrip(self.ui.size_grip)
 
+        # self.item1 =None
+        # fs = None
+        # try:
+        #     self.fs = Ext2Filesystem.fromImageFile(constants.FileName)
+        #     with self.fs:
+        #         self.workingDir = self.fs.rootDir
+        #         op, self.workingDir = ext.shell(self.fs, self.workingDir, 'ls -li')
+        #         for i in op:
+        #             self.item1 = QTreeWidgetItem(i)
+        #             self.ui.treeWidget.addTopLevelItem(self.item1)
+        #         self.ui.treeWidget.itemClicked.connect(self.on_item_clicked)
+        #         op, self.workingDir = ext.shell(self.fs, self.workingDir, 'ls -li')
+
+        #
+        # except IOError:
+        #     print("Could not read device file .")
+
+
         self.show()
-
-
-
-
     def applyButtonStyle(self):
         # Reset style for other buttons
         for w in self.ui.left_side_menu.findChildren(QPushButton):
@@ -164,15 +140,6 @@ class MainWindow(QMainWindow):
         # ###############################################
         # Get the current position of the mouse
         self.clickPosition = event.globalPos()
-        # We will use this value to move the window
-        # ###############################################
-    # ###############################################
-
-
-
-
-
-
 
     # Restore or maximize your window
     def restore_or_maximize_window(self):
@@ -195,6 +162,41 @@ class MainWindow(QMainWindow):
             # Update button icon when window is minimized
             self.ui.restoreButton.setIcon(QtGui.QIcon(u":/icons/icons/cil-window-maximize.png"))#Show maximize icon
 
+    def root_item(self):
+        # Create a root item and add it to the tree
+         try:
+
+            self.fs = Ext2Filesystem.fromImageFile(constants.FileName)
+            with self.fs:
+                self.workingDir = self.fs.rootDir
+                op, self.workingDir = ext.shell(self.fs, self.workingDir, 'ls -li')
+                for i in op:
+                    self.item1 = QTreeWidgetItem(i)
+                    self.ui.treeWidget.addTopLevelItem(self.item1)
+                self.ui.treeWidget.itemClicked.connect(self.add_child_items)
+                #op, self.workingDir = ext.shell(self.fs, self.workingDir, 'ls -li')
+
+
+         except IOError:
+             print("Could not read device file .")
+
+    def add_child_items(self,item, column):
+
+        if column == 0:
+            item_text = item.text(column)
+            d_text = item.text(2)
+
+            item_text = item_text[:len(item_text)-1]
+            if d_text[0] == 'd':
+                with self.fs:
+                    #self.workingDir = self.fs.rootDir
+                    op, self.workingDir = ext.shell(self.fs, self.workingDir, 'cd {0}'.format(item_text))
+                    op, self.workingDir = ext.shell(self.fs, self.workingDir, 'ls -li')
+                    #print(op)
+                    #root = QTreeWidgetItem(item)
+                    for i in op:
+                        new_child = QTreeWidgetItem(i)
+                        item.addChild(new_child)
 
 
 
@@ -203,9 +205,6 @@ class MainWindow(QMainWindow):
 
 
 
-    ########################################################################
-    # Slide left menu
-    ########################################################################
     def slideLeftMenu(self):
         # Get current left menu width
         width = self.ui.left_side_menu.width()
@@ -227,19 +226,26 @@ class MainWindow(QMainWindow):
         self.animation.setEasingCurve(QtCore.QEasingCurve.InOutQuart)
         self.animation.start()
 
-    # //////////////////////////////////////////////////////////////////////
+    # def on_item_clicked(self, item, column):
+    #     if column == 0:
+    #         item_text = item.text(column)
+    #         item_text = item_text[:len(item_text)-1]
+    #         with self.fs:
+    #             op, self.workingDir = ext.shell(self.fs, self.workingDir, 'cd {0}'.format(item_text))
+    #             op, self.workingDir = ext.shell(self.fs, self.workingDir, 'ls -li')
+    #             for i in op:
+    #                 child_item = QTreeWidgetItem(i)
+    #                 self.ui.treeWidget.item1.addChild(child_item)
 
 
 
+                # print(op)
 
 
-
-
-# Execute app
-# 
 if __name__ == "__main__":
     app = QApplication(sys.argv)
     window = MainWindow()
+    window.root_item()
     sys.exit(app.exec_())
 else:
 	print(__name__, "Something is very wrong")
